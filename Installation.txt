@@ -1,0 +1,62 @@
+Install procedures for Wildlife Camera System (WCS)
+
+Use Raspbian operating system on Raspberry Pi
+Pick an id number for the unit--a two to three digit number <xx>.  The id 13 is used in this example.
+Assign a hostname wcs-pi<xx> (e.g. wcs-pi13) during the Raspbian install.  (To do:  Add manual hostname instructions.)
+Update the operating system
+	sudo apt-get update
+Install apache
+	sudo apt-get install apache2 -y
+Install sqlite
+	sudo apt-get install sqlite3
+	sudo apt-get install php5-sqlite
+Install python's pip and required packages
+	cd ~pi/workspace/WCS; sudo python get-pip.py
+	sudo pip install requests
+Install dnsmasq and hostapd services for standalone wireless apd
+	sudo apt-get install -y hostapd dnsmasq
+	sudo update-rc.d hostapd defaults
+	sudo update-rc.d dnsmasq defaults
+Find UUID for flash drive\
+		ls -laF /dev/disk/by-uuid
+	Put uuid found into /etc/fstab, using this example
+		UUID=2E4E-378E /mnt/wcs_flash        vfat    auto,users,rw,flush,utf8=1,uid=www-data,gid=www-data,dmask=002,fmask=113  0       0
+Create a link from /var/www/media to the flash drive.
+	sudo mkdir /mnt/wcs_flash
+	sudo chmod og+w /mnt/wcs_flash
+	Reboot so that the flash drive gets mounted, then...
+	sudo mkdir /mnt/wcs_flash/media
+	sudo chmod og+w /mnt/wcs_flash/media
+	sudo ln -s /mnt/wcs_flash/media /var/www/media
+Create the destination for raspimjpeg
+	mkdir -p /dev/shm/mjpeg
+	
+Wifi:  Edit /mnt/wcs_flash/wcs_wpa.txt
+	wpa-ssid "<network ssid>"
+	wpa-psk "<password>"
+	
+Unit id:  Edit /mnt/wcs_flash/wcs_id.txt and put the unit's id into it
+	id 13
+
+Make /etc/rc.local, which starts the camera and networking, executable	
+	sudo chmod +x /etc/rc.local
+	
+Upload .tar files (etc.tar, RPi_Cam_Web_Interface.tar, usr.tar, www.tar) to ~pi/workspace/, unpack them
+	pscp *.tar pi@10.0.1.33:workspace/WCS
+Run ~pi/workspace/RPi_Cam_Web_Interface/RPi_Cam_Web_Interface_Installer.sh
+	cd ~pi/workspace/RPi_Cam_Web_Interface
+	sudo ./RPi_Cam_Web_Interface_Installer.sh install
+Unpack www.tar to /var
+	cd /var
+	sudo tar xvf ~pi/workspace/WCS/www.tar
+Unpack etc.tar to /etc
+	cd /etc
+	sudo tar xvf ~pi/workspace/WCS/etc.tar
+Unpack usr.tar to /usr
+	cd /usr
+	sudo tar xvf ~pi/workspace/WCS/usr.tar
+	sudo chmod +x /usr/sbin/wcs_network.py
+Change ownership
+	sudo chown www-data /etc/raspimjpeg /etc/motion/motion.conf
+	sudo chgrp www-data /etc/raspimjpeg /etc/motion/motion.conf
+
