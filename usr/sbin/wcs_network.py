@@ -11,7 +11,6 @@ import time
 config_file = '/mnt/wcs_flash/wcs_wpa.txt'
 id_file = '/mnt/wcs_flash/wcs_id.txt'
 
-interfaces_wpa_file = '/etc/network/interfaces.wpa'
 interfaces_ap_file = '/etc/network/interfaces.hostapd'
 
 def in_ap_network( ip ):
@@ -41,7 +40,7 @@ def backup( path, orig ):
 
 def register_ip( ip_addr ):
   import requests
-  id = "999"
+  unit_id = '999'
   if os.path.exists( id_file ):
     try:
       with open( id_file, 'r' ) as cfg:
@@ -50,13 +49,13 @@ def register_ip( ip_addr ):
     except IOError as (errno, strerror):
       print "Id file exists but cannot open: " + id_file
       print "I/O error({0}): {1}".format( errno, strerror )
-      print "Cannot read id file.  Assigning default id of 999."
+      print "Cannot read id file.  Assigning default unit_id of 999."
     for line in read_data:
       i1 = line.find( 'id' )
       if i1 != -1:
-        id = line[i1 + len( 'id' ):].split()[0] 
+        unit_id = line[i1 + len( 'id' ):].split()[0] 
   try:
-    data = dict( id, ip=ip_addr )
+    data = dict( id=unit_id, ip=ip_addr )
     r = requests.get( "http://bellcoho.com/community/Steve/wcs_register.php", params=data )
     print r.url
     print r.text
