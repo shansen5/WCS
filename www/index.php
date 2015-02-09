@@ -57,12 +57,15 @@ ini_set('display_errors', 'On');
         $_POST['rememberMe'] = (int)$_POST['rememberMe'];
         $found = 0;
         $id = 0;
+        $permissions = 0;
         foreach ( $result as $res ) {
             if ( $res["password"] == $_POST['password'] ) {
                 $found = 1;
                 $_SESSION['usr']=$res['first_name'] . $res['last_name'];
                 $id = $res['id'];
                 $_SESSION['id'] = $id;
+                $permissions = $res['permissions'];
+                $_SESSION['permissions'] = $permissions;
                 setcookie('tzRemember',$_POST['rememberMe']);
                 break;
             }
@@ -265,18 +268,28 @@ configurations or start/stop the camera and video/image capture.</p>
                 </form>
             </div>
             
+
             <?php
-            
-            else:
-            
+            /* if ( $_SESSION['permissions'] > 1 ) : */
+            else :
             ?>
             
             <div class="left">
             
+            <?php
+            if ( $_SESSION['permissions'] > 1 ) :
+            ?>
+
             <h1>Access camera configuration</h1>
             
             <p><a href="config.php">Use this link to access the configuration page.</a></p>
             <p>- or -</p>
+
+            <?php
+            endif;
+            ?>
+
+            <p>Use this link to </p>
             <a href="?logoff">Log off</a>
             
             </div>
@@ -318,11 +331,11 @@ configurations or start/stop the camera and video/image capture.</p>
       <h1>Wildlife Cam Images and Videos</h1>
       <?php
         if(isset($_GET["delete"])) {
-          unlink("/mnt/red_flash/media/" . $_GET["delete"]);
+          unlink("/mnt/wcs_flash/media/" . $_GET["delete"]);
         }
         if(isset($_GET["delete_all"])) {
           $files = scandir("media");
-          foreach($files as $file) unlink("/mnt/red_flash/media/$file");
+          foreach($files as $file) unlink("/mnt/wcs_flash/media/$file");
         }
         else if(isset($_GET["file"])) {
           if(substr($_GET["file"], -3) == "jpg") {
@@ -335,15 +348,19 @@ configurations or start/stop the camera and video/image capture.</p>
             echo $_GET["file"] . "<br>";
             echo "<video width='640' controls><source src='media/" . $_GET["file"] . "' type='video/mp4'>Your browser does not support the video tag.</video>";
           }
-          // echo "<p><input type='button' value='Download' onclick='window.open(\"download.php?file=" . $_GET["file"] . "\", \"_blank\");'> ";
+          echo "<p>";
+          echo "<input type='button' value='Close' onclick='window.location=\"index.php?close=" .$_GET["file"] . "\";'>";
           if ($_SESSION['id'] ) {
-            echo "<input type='button' value='Delete' onclick='window.location=\"index.php?delete=" . $_GET["file"] . "\";'></p>";
+            echo "<input type='button' value='Download' onclick='window.open(\"download.php?file=" . $_GET["file"] . "\", \"_blank\");'> ";
+            if ($_SESSION['permissions'] > 0 ) {
+              echo "<input type='button' value='Delete' onclick='window.location=\"index.php?delete=" . $_GET["file"] . "\";'></p>";
+            }
           }
         }
       ?>
       <div><h2>Live Cam<br><img id="mjpeg_dest"></div>
       <?php 
-        if ($_SESSION['id'] ) {
+        if ($_SESSION['id'] && $_SESSION['permissions'] > 0) { 
           echo '<input id="video_button" type="button">';
           echo '<input id="image_button" type="button">';
           echo '<input id="timelapse_button" type="button">';
@@ -351,19 +368,21 @@ configurations or start/stop the camera and video/image capture.</p>
           echo '<input id="halt_button" type="button">';
         }
       ?>
-      <h1>Images and Videos</h1>
       <?php
-        $files = scandir("media");
-        if(count($files) == 2) echo "<p>No videos/images saved</p>";
-        else {
-          foreach($files as $file) {
-            if(($file != '.') && ($file != '..')) {
-              $fsz = round ((filesize("media/" . $file)) / (1024 * 1024));
-              echo "<p><a href='index.php?file=$file'>$file</a> ($fsz MB)</p>";
+        if ($_SESSION['id']) {
+          echo "<h1>Images and Videos</h1>";
+          $files = scandir("media");
+          if(count($files) == 2) echo "<p>No videos/images saved</p>";
+          else {
+            foreach($files as $file) {
+              if(($file != '.') && ($file != '..')) {
+                $fsz = round ((filesize("media/" . $file)) / (1024 * 1024));
+                echo "<p><a href='index.php?file=$file'>$file</a> ($fsz MB)</p>";
+              }
             }
-          }
-          if ($_SESSION['id'] ) {
-            echo "<p><input type='button' value='Delete all' onclick='if(confirm(\"Delete all?\")) {window.location=\"index.php?delete_all\";}'></p>";
+            if ($_SESSION['permissions'] > 0 ) {
+              echo "<p><input type='button' value='Delete all' onclick='if(confirm(\"Delete all?\")) {window.location=\"index.php?delete_all\";}'></p>";
+            }
           }
         }
       ?>
