@@ -15,7 +15,8 @@ session_set_cookie_params(2*7*24*60*60);
 
 session_start();
 
-if($_SESSION['id'] && !isset($_COOKIE['tzRemember']) && !$_SESSION['rememberMe'])
+$id_val = isset( $_SESSION[ 'id' ]) ? $_SESSION[ 'id' ] : '';
+if($id_val && !isset($_COOKIE['tzRemember']) && !$_SESSION['rememberMe'])
 {
     // If you are logged in, but you don't have the tzRemember cookie (browser restart)
     // and you have not checked the rememberMe checkbox:
@@ -36,7 +37,8 @@ if(isset($_GET['logoff']))
     exit;
 }
 
-if($_POST['submit']=='Login')
+$submit_val = isset( $_POST[ 'submit' ]) ? $_POST[ 'submit' ] : '';
+if($submit_val=='Login')
 {
     // Checking whether the Login form has been submitted
     
@@ -89,7 +91,7 @@ ini_set('display_errors', 'Off');
     header("Location: index.php");
     exit;
 }
-else if($_POST['submit']=='Register')
+else if($submit_val=='Register')
 {
     // If the Register form has been submitted
     
@@ -156,7 +158,8 @@ else if($_POST['submit']=='Register')
 
 $script = '';
 
-if($_SESSION['msg'])
+$msg_val = isset( $_SESSION[ 'msg' ]) ? $_SESSION[ 'msg' ] : '';
+if($msg_val)
 {
     // The script below shows the sliding panel on page load
     
@@ -206,7 +209,8 @@ if($_SESSION['msg'])
         <div class="content clearfix">
             
             <?php
-            if(!$_SESSION['id']):
+            $id_val = isset( $_SESSION[ 'id' ]) ? $_SESSION[ 'id' ] : '';
+            if(!$id_val):
             
             ?>
 
@@ -223,10 +227,14 @@ configurations or start/stop the camera and video/image capture.</p>
                     
                     <?php
                         
-                        if($_SESSION['msg']['login-err'])
+                        $msg_val = isset( $_SESSION[ 'msg' ]) ? $_SESSION[ 'msg' ] : '';
+                        if($msg_val) 
                         {
+                          if($_SESSION['msg']['login-err'])
+                          {
                             echo '<div class="err">'.$_SESSION['msg']['login-err'].'</div>';
                             unset($_SESSION['msg']['login-err']);
+                          }
                         }
                     ?>
                     
@@ -246,16 +254,20 @@ configurations or start/stop the camera and video/image capture.</p>
                     
                     <?php
                         
-                        if($_SESSION['msg']['reg-err'])
+                        $msg_val = isset( $_SESSION[ 'msg' ]) ? $_SESSION[ 'msg' ] : '';
+                        if($msg_val)
                         {
+                          if($_SESSION['msg']['reg-err'])
+                          {
                             echo '<div class="err">'.$_SESSION['msg']['reg-err'].'</div>';
                             unset($_SESSION['msg']['reg-err']);
-                        }
+                          }
                         
-                        if($_SESSION['msg']['reg-success'])
-                        {
+                          if($_SESSION['msg']['reg-success'])
+                          {
                             echo '<div class="success">'.$_SESSION['msg']['reg-success'].'</div>';
                             unset($_SESSION['msg']['reg-success']);
+                          }
                         }
                     ?>
                             
@@ -277,7 +289,8 @@ configurations or start/stop the camera and video/image capture.</p>
             <div class="left">
             
             <?php
-            if ( $_SESSION['permissions'] > 1 ) :
+            $perms_val = isset( $_SESSION[ 'permissions' ]) ? $_SESSION[ 'permissions' ] : '';
+            if ( $perms_val > 1 ) :
             ?>
 
             <h1>Access camera configuration</h1>
@@ -298,7 +311,7 @@ configurations or start/stop the camera and video/image capture.</p>
             </div>
             
             <?php
-            endif;initialization
+            endif;
             ?>
         </div>
     </div> <!-- /login -->    
@@ -307,10 +320,18 @@ configurations or start/stop the camera and video/image capture.</p>
     <div class="tab">
         <ul class="login">
             <li class="left">&nbsp;</li>
-            <li>Hello <?php echo $_SESSION['usr'] ? $_SESSION['usr'] : 'Guest';?>!</li>
+            <li>Hello 
+               <?php 
+                 $usr_val = isset( $_SESSION[ 'usr' ]) ? $_SESSION[ 'usr' ] : '';
+                 echo $usr_val ? $usr_val : 'Guest';
+               ?>!</li>
             <li class="sep">|</li>
             <li id="toggle">
-                <a id="open" class="open" href="#"><?php echo $_SESSION['id']?'Config | Log Off':'Log In | Register';?></a>
+                <a id="open" class="open" href="#">
+                  <?php 
+                    $id_val = isset( $_SESSION[ 'id' ]) ? $_SESSION[ 'id' ] : '';
+                    echo $id_val?'Config | Log Off':'Log In | Register';
+                  ?></a>
                 <a id="close" style="display: none;" class="close" href="#">Close Panel</a>            
             </li>
             <li class="right">&nbsp;</li>
@@ -360,7 +381,9 @@ configurations or start/stop the camera and video/image capture.</p>
       ?>
       <div><h2>Live Cam<br><img id="mjpeg_dest"></div>
       <?php 
-        if ($_SESSION['id'] && $_SESSION['permissions'] > 0) { 
+        $id_val = isset( $_POST[ 'id' ]) ? $_POST[ 'id' ] : '';
+        $perms_val = isset( $_POST[ 'perms' ]) ? $_POST[ 'perms' ] : '';
+        if ($id_val && $perms_val > 0) { 
           echo '<input id="video_button" type="button">';
           echo '<input id="image_button" type="button">';
           echo '<input id="timelapse_button" type="button">';
@@ -369,7 +392,8 @@ configurations or start/stop the camera and video/image capture.</p>
         }
       ?>
       <?php
-        if ($_SESSION['id']) {
+        $id_val = isset( $_SESSION[ 'id' ]) ? $_SESSION[ 'id' ] : '';
+        if ($id_val) {
           echo "<h1>Images and Videos</h1>";
           $files = scandir("media");
           if(count($files) == 2) echo "<p>No videos/images saved</p>";
@@ -380,7 +404,8 @@ configurations or start/stop the camera and video/image capture.</p>
                 echo "<p><a href='index.php?file=$file'>$file</a> ($fsz MB)</p>";
               }
             }
-            if ($_SESSION['permissions'] > 0 ) {
+            $perms_val = isset( $_SESSION[ 'permissions' ]) ? $_SESSION[ 'permissions' ] : '';
+            if ($perms_val > 0 ) {
               echo "<p><input type='button' value='Delete all' onclick='if(confirm(\"Delete all?\")) {window.location=\"index.php?delete_all\";}'></p>";
             }
           }

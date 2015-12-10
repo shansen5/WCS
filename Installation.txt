@@ -12,7 +12,9 @@ Install sqlite
 	sudo apt-get install php5-sqlite
 Install python's pip and required packages
 	cd ~pi/workspace/WCS; sudo python get-pip.py
-	sudo pip install requests
+	sudo pip install requests logging
+Make the directory for the logging
+	mkdir /home/pi/log
 Install dnsmasq and hostapd services for standalone wireless apd
 	sudo apt-get install -y hostapd dnsmasq
 	sudo update-rc.d hostapd defaults
